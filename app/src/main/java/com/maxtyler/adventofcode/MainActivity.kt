@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.maxtyler.adventofcode.puzzles.year2021.day01
 import com.maxtyler.adventofcode.ui.theme.AdventOfCodeTheme
+import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
