@@ -2,62 +2,39 @@ package com.maxtyler.adventofcode.puzzles.year2021
 
 import com.maxtyler.adventofcode.puzzles.Puzzle
 
-object day03 : Puzzle<List<List<Char>>> {
+object day03 : Puzzle<List<List<Int>>> {
 
-    private fun countBits(chars: List<List<Char>>): List<Int> =
-        chars.fold(List(chars.first().count(), { 0 })) { counts, cs ->
-            counts.zip(cs.toList()).map { (count, char) ->
-                count + if (char == '1') 1 else 0
-            }
+    private fun countBits(bits: List<List<Int>>): Pair<List<Int>, List<Int>> =
+        bits.fold(List(bits.first().count(), { 0 })) { counts, cs ->
+            counts.zip(cs).map { (count, v) -> count + v }
+        }.let { counts ->
+            Pair(
+                counts.map { if (it >= bits.count() / 2.0) 1 else 0 },
+                counts.map { if (it >= bits.count() / 2.0) 0 else 1 }
+            )
         }
 
-    override fun parseInput(input: String) = input.lines().map { it.toList() }.toList()
+    override fun parseInput(input: String) = input.lines().map { it.map { it.digitToInt() } }
 
-    override fun part1(input: List<List<Char>>): String {
-        val counts = countBits(input)
-        val gamma =
-            String(counts.map { if (it > input.count() / 2) '1' else '0' }.toCharArray()).toInt(2)
-        val epsilon =
-            String(counts.map { if (it <= input.count() / 2) '1' else '0' }.toCharArray()).toInt(2)
+    override fun part1(input: List<List<Int>>): String {
+        val (pop, unpop) = countBits(input)
+        val gamma = pop.joinToString("").toInt(2)
+        val epsilon = unpop.joinToString("").toInt(2)
         return "${gamma * epsilon}"
     }
 
-    override fun part2(input: List<List<Char>>): String {
-        val bitLength = input.first().count()
-        val counts = countBits(input)
-        var (oxygen, co2) = input.partition { (counts[0] > input.count() / 2) == (it[0] == '1') }
-        var position = 1
-        while (position < bitLength) {
-            if (oxygen.count() > 1) {
-                oxygen = oxygen.filter {
-                    countBits(oxygen)[position].let { n ->
-                        if (n.toDouble() == oxygen.count() / 2.0) {
-                            it[position] == '1'
-                        } else {
-                            (it[position] == '1') == (n > oxygen.count() / 2.0)
-                        }
-                    }
-                }
+    override fun part2(input: List<List<Int>>): String {
+        val oxygen = generateSequence(input to 0) { (bits, i) ->
+            if (bits.count() <= 1) null else {
+                bits.filter { it[i] == countBits(bits).first[i] } to i + 1
             }
-            if (co2.count() > 1) {
-                co2 =
-                    co2.filter {
-                        countBits(co2)[position].let { n ->
-                            if (n.toDouble() == co2.count() / 2.0) {
-                                it[position] == '0'
-                            } else {
-                                (it[position] == '1') == (n < co2.count() / 2.0)
-                            }
-                        }
-                    }
+        }.last().first.first()
+        val co2 = generateSequence(input to 0) { (bits, i) ->
+            if (bits.count() <= 1) null else {
+                bits.filter { it[i] == countBits(bits).second[i] } to i + 1
             }
-            position += 1
-        }
+        }.last().first.first()
 
-        return "${
-            String(oxygen.first().toCharArray()).toInt(2) * String(
-                co2.first().toCharArray()
-            ).toInt(2)
-        }"
+        return "${oxygen.joinToString("").toInt(2) * co2.joinToString("").toInt(2)}"
     }
 }
