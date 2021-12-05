@@ -5,12 +5,15 @@ import com.maxtyler.adventofcode.puzzles.Puzzle
 data class Bingo(val plays: List<Int>, val boards: List<Board>)
 
 data class Board(val nums: List<List<Int>>) {
-    fun score(called: List<Int>): Int? {
-        return if (nums.any { it.all { it in called } } or (0 until nums.first()
-                .count()).any { i -> nums.all { it[i] in called } }) {
-            nums.flatten().fold(0) { acc, v -> acc + (if (v in called) 0 else v) } * called.last()
-        } else null
-    }
+    fun score(called: List<Int>) = if (nums.any { it.all { it in called } } or (0 until nums.first()
+            .count()).any { i -> nums.all { it[i] in called } }) {
+        nums.flatten().fold(0) { acc, v -> acc + (if (v in called) 0 else v) } * called.last()
+    } else null
+
+    fun turnsToComplete(called: List<Int>) =
+        (1..called.count()).asSequence().mapNotNull { i -> score(called.take(i))?.let { it to i } }
+            .firstOrNull()
+
 }
 
 object day04 : Puzzle<Bingo> {
@@ -26,22 +29,13 @@ object day04 : Puzzle<Bingo> {
         return Bingo(nums, boards)
     }
 
-    override fun part1(input: Bingo): String {
-        val (called, boards) = input
-        val score = (1..called.count()).asSequence().mapNotNull {
-            boards.mapNotNull { board -> board.score(called.take(it)) }.firstOrNull()
-        }.firstOrNull()
-        return score.toString()
-    }
+    override fun part1(input: Bingo) =
+        input.boards.mapNotNull { it.turnsToComplete(input.plays) }.sortedBy { it.second }
+            .first().first.toString()
 
-    override fun part2(input: Bingo): String {
-        val (called, boards) = input
-        return (1..called.count()).first { n -> boards.all { it.score(called.take(n)) != null } }
-            .let { n ->
-                val prev =
-                    boards.mapIndexedNotNull { i, b -> b.score(called.take(n - 1))?.let { i } }
-                boards.filterIndexed { i, b -> !(i in prev) }.first().score(called.take(n))
-            }.toString()
-    }
+
+    override fun part2(input: Bingo) =
+        input.boards.mapNotNull { it.turnsToComplete(input.plays) }.sortedBy { it.second }
+            .last().first.toString()
 
 }
