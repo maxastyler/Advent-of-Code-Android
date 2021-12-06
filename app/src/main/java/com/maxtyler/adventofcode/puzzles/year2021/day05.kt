@@ -1,31 +1,16 @@
 package com.maxtyler.adventofcode.puzzles.year2021
 
 import com.maxtyler.adventofcode.puzzles.Puzzle
-import kotlin.math.absoluteValue
+import kotlin.math.sign
 
 data class Line(val start: Pair<Int, Int>, val end: Pair<Int, Int>) {
     fun isBasic() = (start.first == end.first) or (start.second == end.second)
     fun points(): List<Pair<Int, Int>> {
-        val dx = (end.first - start.first).absoluteValue
-        val dy = -((end.second - start.second).absoluteValue)
-        val sx = if (start.first < end.first) 1 else -1
-        val sy = if (start.second < end.second) 1 else -1
-        val error = dx + dy
-        return generateSequence(Triple(start.first, start.second, error)) { (x0, y0, err) ->
-            if ((x0 == end.first) and (y0 == end.second)) null else {
-                val e2 = err * 2
-                var (newX, newY, newE) = Triple(x0, y0, err)
-                if (e2 >= dy) {
-                    newE += dy
-                    newX += sx
-                }
-                if (e2 <= dx) {
-                    newE += dx
-                    newY += sy
-                }
-                Triple(newX, newY, newE)
-            }
-        }.map { (x, y, _) -> x to y }.toList()
+        val dx = (end.first - start.first).sign
+        val dy = (end.second - start.second).sign
+        return generateSequence(start.first to start.second) { (x, y) ->
+            if ((x == end.first) and (y == end.second)) null else (x + dx to y + dy)
+        }.toList()
     }
 }
 
