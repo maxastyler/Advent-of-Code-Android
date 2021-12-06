@@ -17,8 +17,8 @@ object day06 : Puzzle<List<Long>> {
             .let { counts -> List(7 + 9) { counts[it]?.toLong() ?: 0L } }
 
     override fun part1(input: List<Long>) =
-        generateSequence(input, ::step).drop(80).first().sum().toString()
+        generateSequence(input, ::step).elementAt(80).sum().toString()
 
     override fun part2(input: List<Long>) =
-        generateSequence(input, ::step).drop(256).first().sum().toString()
+        generateSequence(input, ::step).elementAt(256).sum().toString()
 }
