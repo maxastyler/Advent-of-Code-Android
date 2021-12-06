@@ -14,7 +14,7 @@ object day06 : Puzzle<List<Long>> {
 
     override fun parseInput(input: String) =
         Regex("(\\d+)").findAll(input).map { it.value.toInt() }.groupingBy { it }.eachCount()
-            .let { counts -> MutableList(7 + 9) { counts[it]?.toLong() ?: 0L } }
+            .let { counts -> List(7 + 9) { counts[it]?.toLong() ?: 0L } }
 
     override fun part1(input: List<Long>): String {
         return generateSequence(input, ::step).drop(80).first().sum().toString()
