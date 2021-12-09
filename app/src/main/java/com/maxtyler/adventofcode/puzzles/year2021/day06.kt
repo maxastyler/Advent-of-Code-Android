@@ -2,15 +2,16 @@ package com.maxtyler.adventofcode.puzzles.year2021
 
 import com.maxtyler.adventofcode.puzzles.Puzzle
 
-fun step(fish: List<Long>): List<Long> = fish.mapIndexed { i, l ->
-    when {
-        i == 6 -> fish[0] + fish[7]
-        i == 15 -> fish[0] + fish[7]
-        else -> fish[i + 1]
-    }
-}
 
 object day06 : Puzzle<List<Long>> {
+
+    fun step(fish: List<Long>): List<Long> = fish.mapIndexed { i, l ->
+        when {
+            i == 6 -> fish[0] + fish[7]
+            i == 15 -> fish[0] + fish[7]
+            else -> fish[i + 1]
+        }
+    }
 
     override fun parseInput(input: String) =
         Regex("(\\d+)").findAll(input).map { it.value.toInt() }.groupingBy { it }.eachCount()

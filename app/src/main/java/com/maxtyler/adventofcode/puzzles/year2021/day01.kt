@@ -6,7 +6,6 @@ object day01 : Puzzle<List<Int>> {
     override fun parseInput(input: String): List<Int> =
         Regex("(\\d+)").findAll(input).map { it.value.toInt() }.toList()
 
-
     override fun part1(input: List<Int>): String =
         input.windowed(2).filter { (a, b) -> b > a }.count().toString()
 

@@ -1,6 +1,6 @@
 package com.maxtyler.adventofcode.puzzles.year2021
 
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class day09Test {
