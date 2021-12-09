@@ -20,7 +20,6 @@ data class Clue(val signals: List<Set<Char>>, val output: List<Set<Char>>) {
             this.signals.find { (it.intersect(mapping[4]!!).size == 2) and !(it in mapping.values) }!!
         mapping[3] =
             this.signals.find { (it.intersect(mapping[8]!!).size == 5) and !(it in mapping.values) }!!
-        println(this.signals.count { !(it in mapping.values) })
         mapping[0] = this.signals.find { !(it in mapping.values) }!!
         return this.output.mapNotNull { digit -> mapping.firstNotNullOfOrNull { if (it.value == digit) it.key else null } }
     }
