@@ -3,15 +3,13 @@ package com.maxtyler.adventofcode.puzzles.year2021
 import com.maxtyler.adventofcode.puzzles.Puzzle
 
 object day13 : Puzzle<day13.Folds> {
-    enum class Direction { Up, Left }
-
-    data class Folds(val points: Set<Pair<Int, Int>>, val folds: List<Pair<Direction, Int>>) {
+    data class Folds(val points: Set<Pair<Int, Int>>, val folds: List<Pair<String, Int>>) {
         fun doFolds() = generateSequence(this) { (points, folds) ->
             folds.firstOrNull()?.let { (dir, pos) ->
                 Folds(points.map { (x, y) ->
                     when (dir) {
-                        Direction.Up -> Pair(x, if (y > pos) pos - (y - pos) else y)
-                        Direction.Left -> Pair(if (x > pos) pos - (x - pos) else x, y)
+                        "y" -> Pair(x, if (y > pos) pos - (y - pos) else y)
+                        else -> Pair(if (x > pos) pos - (x - pos) else x, y)
                     }
                 }.toSet(), folds.drop(1))
             }
@@ -26,7 +24,7 @@ object day13 : Puzzle<day13.Folds> {
             }.toSet(),
         Regex("fold along ([xy])=(\\d+)").findAll(input).map {
             val (dir, pos) = it.destructured
-            Pair(if (dir == "x") Direction.Left else Direction.Up, pos.toInt())
+            Pair(dir, pos.toInt())
         }.toList()
     )
 
