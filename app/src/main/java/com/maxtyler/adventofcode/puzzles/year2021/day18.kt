@@ -4,6 +4,54 @@ import com.maxtyler.adventofcode.puzzles.Puzzle
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
+val explodeRegex = Regex("\\[(\\d+),(\\d+)\\]")
+val numRegex = Regex("(\\d+)")
+
+fun sum(s1: String, s2: String) = "[$s1,$s2]"
+
+fun explode(s: String): String? {
+    val depth = s.scan(0) { a, c ->
+        when (c) {
+            '[' -> a.inc()
+            ']' -> a.dec()
+            else -> a
+        }
+    }
+    return explodeRegex.findAll(s).map {
+        it.range to (it.destructured.component1().toInt() to it.destructured.component2().toInt())
+    }
+        .firstOrNull { depth[it.first.first] >= 4 }
+        ?.let { (range, nums) ->
+            s.substring(0..range.first.dec()).let { before ->
+                numRegex.findAll(before).lastOrNull()?.let { it ->
+                    before.replaceRange(
+                        it.range,
+                        (it.value.toInt() + nums.first).toString()
+                    )
+                } ?: before
+            } + '0' +
+                    s.substring(range.last.inc()..s.length.dec()).let { after ->
+                        numRegex.findAll(after).firstOrNull()?.let { it ->
+                            after.replaceRange(
+                                it.range,
+                                (it.value.toInt() + nums.second).toString()
+                            )
+                        } ?: after
+                    }
+        }
+}
+
+fun split(s: String) = numRegex.findAll(s).firstOrNull { it.value.toInt() >= 10 }?.let {
+    val i = it.value.toInt()
+    s.replaceRange(
+        it.range,
+        "[${i.floorDiv(2)},${ceil(i.toFloat() / 2f).roundToInt()}]"
+    )
+}
+
+fun reduce(s: String) = generateSequence(s) { explode(it) ?: split(it) }
+
+
 @OptIn(kotlin.ExperimentalStdlibApi::class)
 object day18 : Puzzle<List<day18.BTree<Int>>> {
     sealed class Path<T> {
