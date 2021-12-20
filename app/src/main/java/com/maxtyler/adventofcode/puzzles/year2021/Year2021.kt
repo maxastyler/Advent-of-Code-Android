@@ -21,7 +21,8 @@ object Year2021 {
             day16,
             day17,
             day18,
-            day19
+            day19,
+            day20
         ).forEach { day ->
             INPUTS2021[day::class.simpleName]?.let { input ->
                 println("${day::class.simpleName}")
