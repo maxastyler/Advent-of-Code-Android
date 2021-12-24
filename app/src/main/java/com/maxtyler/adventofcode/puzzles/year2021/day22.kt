@@ -34,6 +34,9 @@ object day22 : Puzzle<List<day22.Instruction>> {
         }
     }
 
+    fun IntRange.cutOut(other: IntRange): List<IntRange> =
+        this.splitBy(other).filter { it.overlap(other) == null }
+
     infix fun Cuboid.intersects(other: Cuboid) =
         this.zip(other).all { (a, b) -> a.overlap(b) != null }
 
@@ -50,42 +53,16 @@ object day22 : Puzzle<List<day22.Instruction>> {
         return innerFun(seq)
     }
 
-    infix fun Cuboid.split(other: Cuboid): List<Cuboid> {
-        val overlaps = this.zip(other)
-            .map { (r1, r2) -> r1.overlap(r2)?.toList()?.filter { it.first <= it.last } }
-        return if (overlaps.any { it == null }) listOf(this, other) else {
-            product(overlaps.filterNotNull())
-        }
-    }
-
     fun Cuboid.cutOut(other: Cuboid): List<Cuboid> {
-        val overlaps = this.zip(other)
-            .map { (r1, r2) -> r1.splitBy(r2) }
-        return if (overlaps.any { it.size <= 1 }) listOf(this) else {
-            product(overlaps).filter { !(it intersects other) }
-        }.also { noIntersections(it) }
+        if (!this.intersects(other)) return listOf(this)
+        else {
+            val overlaps = this.zip(other)
+                .map { (r1, r2) -> r1.splitBy(r2) }
+            return product(overlaps).filter { !(it.intersects(other)) }
+        }
     }
 
     fun Cuboid.volume() = this.fold(1L) { a, v -> (v.last.inc() - v.first) * a }
-
-    fun noIntersections(l: List<Cuboid>) {
-        val sects =
-            l.flatMap { c -> l.filter { it != c && it intersects c }.map { c to it } }.firstOrNull()
-        assert(sects == null) { "${sects}" }
-    }
-
-
-    fun runInstructions(instructions: List<Instruction>) =
-        instructions.drop(1).fold(listOf(instructions.first().cuboid)) { a, (state, cuboid) ->
-            val (intersecting, nonIntersecting) = a.partition { it intersects cuboid }
-            when {
-                state && intersecting.isEmpty() -> nonIntersecting + listOf(cuboid)
-                state -> nonIntersecting + intersecting + intersecting.fold(listOf(cuboid)) { newCubes, c ->
-                    newCubes.flatMap { it.cutOut(c) }
-                }
-                else -> nonIntersecting + intersecting.flatMap { it.cutOut(cuboid) }
-            }
-        }
 
     override fun parseInput(input: String) =
         Regex("(on|off) x=(-?\\d+)..(-?\\d+),y=(-?\\d+)..(-?\\d+),z=(-?\\d+)..(-?\\d+)")
@@ -102,9 +79,22 @@ object day22 : Puzzle<List<day22.Instruction>> {
                 )
             }.toList()
 
+    fun runInstructions(input: List<Instruction>): List<Cuboid> {
+        return input.drop(1).fold(listOf(input.first().cuboid)) { cubes, (state, newCube) ->
+            if (state) cubes + cubes.fold(listOf(newCube)) { newCubes, c ->
+                newCubes.flatMap {
+                    it.cutOut(
+                        c
+                    )
+                }
+            } else
+                cubes.flatMap { it.cutOut(newCube) }
+        }
+    }
+
     override fun part1(input: List<Instruction>) =
         runInstructions(input).mapNotNull {
-            it.map { maxOf(it.first, -50)..minOf(it.last, 50) }
+            if (it.intersects(List(3) { -50..50 })) it else null
         }.sumOf { it.volume() }.toString()
 
     override fun part2(input: List<Instruction>): String {

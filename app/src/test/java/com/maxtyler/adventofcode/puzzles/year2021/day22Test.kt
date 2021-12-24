@@ -13,12 +13,12 @@ import org.junit.Test
 
 class day22Test {
     val inputs = mapOf(
-        """
-            on x=10..12,y=10..12,z=10..12
-            on x=11..13,y=11..13,z=11..13
-            off x=9..11,y=9..11,z=9..11
-            on x=10..10,y=10..10,z=10..10
-        """.trimIndent() to "39",
+//        """
+//            on x=10..12,y=10..12,z=10..12
+//            on x=11..13,y=11..13,z=11..13
+//            off x=9..11,y=9..11,z=9..11
+//            on x=10..10,y=10..10,z=10..10
+//        """.trimIndent() to "39",
         """
             on x=-20..26,y=-36..17,z=-47..7
             on x=-20..33,y=-21..23,z=-26..28
@@ -124,6 +124,14 @@ class day22Test {
         assertEquals(listOf(0..2, 3..3, 4..6), (0..6).splitBy(3..3))
         assertEquals(listOf(-10..0, 1..10), (-10..10).splitBy(-100..0))
         assertEquals(listOf(-10..10), (-10..10).splitBy(100..120))
+        assertEquals(listOf(0..10), (0..10).splitBy(0..10))
+    }
+
+    @Test
+    fun intRangeCutOut() {
+        assertEquals(listOf(0..10), (0..100).cutOut(11..1000))
+        assertEquals(listOf(-10..10, 20..100), (-10..100).cutOut(11..19))
+        assertEquals(listOf(0..10), (-100..10).cutOut(-1000..-1))
     }
 
     @Test
@@ -176,6 +184,28 @@ class day22Test {
             (21 * 21 * 21) - (11 * 11 * 11),
             listOf(-10..10, -10..10, -10..10).cutOut(listOf(0..10, 0..10, 0..10))
                 .sumOf { it.volume() })
+        day22.noIntersections(
+            listOf(-10..10, -10..10, -10..10).cutOut(
+                listOf(
+                    0..100,
+                    0..10,
+                    0..10
+                )
+            )
+        )
+        day22.noIntersections(
+            listOf(-10..10, -10..10, -10..10).cutOut(
+                listOf(
+                    0..100,
+                    -100..100,
+                    0..10
+                )
+            )
+        )
+        assertEquals(
+            setOf(listOf(-10..10, 1..10), listOf(-10..10, -10..-1)),
+            listOf(-10..10, -10..10).cutOut(listOf(-100..100, 0..0)).toSet()
+        )
     }
 
     @Test
